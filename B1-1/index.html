@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>차준혁 | AI 서비스 빌더 포트폴리오</title>
+  <meta name="description" content="효율성을 지향하는 AI 서비스 빌더 차준혁(chabee)의 포트폴리오입니다." />
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <script defer src="js/state.js"></script>
+  <script defer src="js/theme.js"></script>
+  <script defer src="js/nav.js"></script>
+  <script defer src="js/hero.js"></script>
+  <script defer src="js/projects.js"></script>
+  <script defer src="js/form.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <!-- ===== Header / Navigation ===== -->
+  <header class="header" id="header">
+    <nav class="nav" aria-label="주요 메뉴">
+      <a class="nav__logo" href="#hero">
+        <span class="nav__logo-mark">CB</span>
+        <span class="nav__logo-text">chabee</span>
+      </a>
+
+      <ul class="nav__menu" id="nav-menu">
+        <li><a class="nav__link" href="#about">About</a></li>
+        <li><a class="nav__link" href="#skills">Skills</a></li>
+        <li><a class="nav__link" href="#projects">Projects</a></li>
+        <li><a class="nav__link" href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <button class="icon-btn" id="theme-toggle" type="button"
+                aria-label="다크 모드 전환" aria-pressed="false">
+          <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.5" />
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+          </svg>
+          <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" />
+          </svg>
+        </button>
+
+        <button class="icon-btn nav__hamburger" id="nav-toggle" type="button"
+                aria-label="메뉴 열기" aria-expanded="false" aria-controls="nav-menu">
+          <span class="nav__bar"></span>
+          <span class="nav__bar"></span>
+          <span class="nav__bar"></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="hero">
+      <div class="container hero__inner">
+        <p class="hero__greeting reveal">Hello, I'm</p>
+        <h1 class="hero__title reveal">차준혁 <span class="hero__title-en">chabee</span></h1>
+        <p class="hero__typing" aria-live="polite">
+          <span id="typing-text"></span><span class="hero__caret" aria-hidden="true"></span>
+        </p>
+        <p class="hero__desc reveal">
+          문제를 먼저 정의하고, 꼭 필요한 곳에만 AI를 도입합니다.
+        </p>
+        <div class="hero__actions reveal">
+          <a class="btn btn--primary" href="#projects">View Projects</a>
+          <a class="btn btn--ghost" href="#contact">Contact</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== About ===== -->
+    <section class="section" id="about">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">01</p>
+          <h2 class="section__title">About</h2>
+          <p class="section__subtitle">효율성을 지향하는 AI 서비스 빌더</p>
+        </header>
+
+        <div class="about">
+          <figure class="about__figure reveal">
+            <img class="about__photo" src="images/profile.jpg"
+                 alt="정면을 바라보고 있는 차준혁의 프로필 사진" width="413" height="531" />
+            <figcaption class="about__caption">차준혁 &middot; chabee</figcaption>
+          </figure>
+
+          <div class="about__body reveal">
+            <p class="about__lead">
+              사람, 기업, 정부의 문제를 정의하고 시장을 충분히 이해한 후
+              문제를 해결하기 위한 AI 기술을 도입합니다.
+            </p>
+            <p>
+              비용효율을 위해 꼭 필요한 곳에만 AI 기술을 도입합니다.
+              모델을 크게 쓰는 것보다, 문제에 맞는 최소한의 구성을 찾는 일이 먼저라고 생각합니다.
+            </p>
+            <p>
+              실사용을 했을 때의 운영 효율성 또한 고려하여 설계합니다.
+              배포 이후에도 유지·관측·비용이 감당 가능한 구조인지를 기준으로 판단합니다.
+            </p>
+
+            <ul class="about__facts">
+              <li class="about__fact">
+                <span class="about__fact-label">Focus</span>
+                <span class="about__fact-value">AI 서비스 설계 &amp; 운영</span>
+              </li>
+              <li class="about__fact">
+                <span class="about__fact-label">Based in</span>
+                <span class="about__fact-value">대한민국</span>
+              </li>
+              <li class="about__fact">
+                <span class="about__fact-label">Email</span>
+                <span class="about__fact-value">
+                  <a href="mailto:chabee2027@gmail.com">chabee2027@gmail.com</a>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Skills ===== -->
+    <section class="section section--alt" id="skills">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">02</p>
+          <h2 class="section__title">Skills</h2>
+          <p class="section__subtitle">사용하는 언어, 기술, 그리고 도구</p>
+        </header>
+
+        <div class="skills">
+          <article class="skills__group reveal">
+            <h3 class="skills__group-title">Languages</h3>
+            <ul class="skills__levels">
+              <li class="skill">
+                <div class="skill__head">
+                  <span class="skill__name">Python</span>
+                  <span class="skill__pct">70%</span>
+                </div>
+                <div class="skill__track">
+                  <div class="skill__bar" data-level="70"></div>
+                </div>
+              </li>
+              <li class="skill">
+                <div class="skill__head">
+                  <span class="skill__name">Java</span>
+                  <span class="skill__pct">60%</span>
+                </div>
+                <div class="skill__track">
+                  <div class="skill__bar" data-level="60"></div>
+                </div>
+              </li>
+              <li class="skill">
+                <div class="skill__head">
+                  <span class="skill__name">JavaScript</span>
+                  <span class="skill__pct">40%</span>
+                </div>
+                <div class="skill__track">
+                  <div class="skill__bar" data-level="40"></div>
+                </div>
+              </li>
+            </ul>
+          </article>
+
+          <article class="skills__group reveal">
+            <h3 class="skills__group-title">Backend</h3>
+            <ul class="tags">
+              <li class="tag">Spring</li>
+              <li class="tag">Node.js</li>
+              <li class="tag">FastAPI</li>
+            </ul>
+
+            <h3 class="skills__group-title">Infra &amp; DevOps</h3>
+            <ul class="tags">
+              <li class="tag">AWS</li>
+              <li class="tag">GCP</li>
+              <li class="tag">Docker</li>
+              <li class="tag">Kubernetes</li>
+              <li class="tag">GitHub CI/CD</li>
+              <li class="tag">Vercel</li>
+              <li class="tag">Railway</li>
+              <li class="tag">Supabase</li>
+            </ul>
+          </article>
+
+          <article class="skills__group reveal">
+            <h3 class="skills__group-title">AI / ML</h3>
+            <ul class="tags">
+              <li class="tag">LLM</li>
+              <li class="tag">RAG</li>
+              <li class="tag">MultiModal</li>
+              <li class="tag">Recommender System</li>
+              <li class="tag">BiLSTM</li>
+              <li class="tag">TFT</li>
+              <li class="tag">AST-GCN</li>
+              <li class="tag">YOLOv8</li>
+              <li class="tag">LightGBM</li>
+              <li class="tag">Prophet</li>
+            </ul>
+
+            <h3 class="skills__group-title">AI Tooling</h3>
+            <ul class="tags">
+              <li class="tag">Claude Code</li>
+              <li class="tag">Codex</li>
+              <li class="tag">Antigravity</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Projects (GitHub API) ===== -->
+    <section class="section" id="projects">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">03</p>
+          <h2 class="section__title">Projects</h2>
+          <p class="section__subtitle">GitHub API로 가져온 공개 저장소 목록</p>
+        </header>
+
+        <!-- 언어 필터 버튼: projects.js가 데이터 로드 후 채웁니다 -->
+        <div class="filters" id="project-filters" role="group" aria-label="언어별 필터" hidden></div>
+
+        <!-- 상태에 따라 projects.js가 이 영역의 내용을 갈아끼웁니다 -->
+        <div class="projects" id="projects-view" aria-live="polite" aria-busy="true"></div>
+      </div>
+    </section>
+
+    <!-- ===== Contact ===== -->
+    <section class="section section--alt" id="contact">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">04</p>
+          <h2 class="section__title">Contact</h2>
+          <p class="section__subtitle">문의를 남겨주시면 이메일로 회신드립니다</p>
+        </header>
+
+        <form class="form reveal" id="contact-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="name">이름 <span class="field__required" aria-hidden="true">*</span></label>
+            <input class="field__input" type="text" id="name" name="name"
+                   placeholder="홍길동" autocomplete="name"
+                   aria-describedby="name-error" />
+            <p class="field__error" id="name-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="email">이메일 <span class="field__required" aria-hidden="true">*</span></label>
+            <input class="field__input" type="email" id="email" name="email"
+                   placeholder="you@example.com" autocomplete="email"
+                   aria-describedby="email-error" />
+            <p class="field__error" id="email-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="message">메시지 <span class="field__required" aria-hidden="true">*</span></label>
+            <textarea class="field__input field__input--area" id="message" name="message" rows="6"
+                      placeholder="어떤 문제를 함께 풀고 싶으신가요? (10자 이상)"
+                      aria-describedby="message-error"></textarea>
+            <p class="field__error" id="message-error" role="alert"></p>
+          </div>
+
+          <div class="form__footer">
+            <button class="btn btn--primary" type="submit">보내기</button>
+            <p class="form__status" id="form-status" role="status"></p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year">2026</span> 차준혁 (chabee). All rights reserved.</p>
+
+      <ul class="footer__links">
+        <li>
+          <a class="footer__link" href="https://github.com/chabeegees" target="_blank" rel="noopener noreferrer">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+            </svg>
+            <span>chabeegees</span>
+          </a>
+        </li>
+        <li>
+          <a class="footer__link" href="https://github.com/junhyeok-cha" target="_blank" rel="noopener noreferrer">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+            </svg>
+            <span>junhyeok-cha</span>
+          </a>
+        </li>
+        <li>
+          <a class="footer__link" href="mailto:chabee2027@gmail.com">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
+              <path d="m3.5 6.5 8.5 6 8.5-6" />
+            </svg>
+            <span>chabee2027@gmail.com</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <button class="scroll-top" id="scroll-top" type="button" aria-label="맨 위로 이동">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </svg>
+  </button>
+</body>
+</html>
