@@ -769,10 +769,30 @@ button {
   box-shadow: var(--shadow-lg);
 }
 
+/* 조직 저장소 중 직접 골라 앞에 내세운 카드 */
+.card--featured {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
 .card__owner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
+}
+
+.card__badge {
+  padding: 1px var(--space-2);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .card__title {

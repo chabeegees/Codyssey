@@ -130,14 +130,42 @@ B1-1/
 
 ### GitHub API 연동
 
-두 계정(`chabeegees`, `junhyeok-cha`)의 공개 저장소를 `Promise.all`로 동시에 불러와
-하나의 목록으로 합치고, 최근 업데이트 순으로 정렬합니다. 포크한 저장소는 제외합니다.
+저장소를 **두 종류의 엔드포인트**에서 가져와 하나의 목록으로 합칩니다.
 
 ```js
+// ① 개인 계정의 저장소 전체  → /users/{id}/repos
 const GITHUB_USERNAMES = ['chabeegees', 'junhyeok-cha'];
+
+// ② 조직 소속이라 ①에 안 잡히는, 먼저 보여주고 싶은 저장소 → /repos/{owner}/{repo}
+const FEATURED_REPOS = [
+  '2026-Unithon/AskBuddy',
+  'soongsil-database-bouget/soongsil-database-bouget',
+  'Blueocean-union/Union-Project',
+];
 ```
 
-이 배열에 아이디를 넣고 빼는 것만으로 표시 대상이 바뀝니다.
+이 두 배열에 값을 넣고 빼는 것만으로 표시 대상이 바뀝니다.
+
+**왜 엔드포인트를 나눴는가** — `/users/{id}/repos`는 그 계정이 **소유한** 저장소만 돌려줍니다.
+해커톤·공모전처럼 조직(Organization) 계정 아래에 만든 저장소는 기여자여도 여기에 포함되지 않습니다.
+그래서 조직 저장소는 `'owner/repo'` 이름으로 하나씩 직접 요청합니다.
+
+**실패를 다르게 다룹니다.**
+
+```js
+const [userResults, featuredResults] = await Promise.all([
+  Promise.all(GITHUB_USERNAMES.map(fetchReposOf)),     // 하나라도 실패하면 → 에러 상태
+  Promise.allSettled(FEATURED_REPOS.map(fetchRepo)),   // 실패한 것만 빼고 나머지는 표시
+]);
+```
+
+- 개인 계정 조회는 `Promise.all` — 실패하면 보여줄 게 거의 없으므로 에러 화면으로 갑니다.
+- Featured 저장소는 `Promise.allSettled` — 그중 하나가 비공개로 바뀌어도
+  **나머지 목록 전체가 날아가지 않도록** 실패한 것만 조용히 빼고 렌더합니다.
+
+Featured 저장소는 목록 맨 앞에 오고 `Featured` 배지와 강조 테두리가 붙습니다.
+개인 저장소 목록에 같은 저장소가 있으면 `Set`으로 id를 비교해 중복을 제거합니다.
+그 뒤 각 그룹을 최근 업데이트 순으로 정렬하고, 포크한 저장소는 제외합니다.
 
 **네 가지 상태가 모두 화면으로 구분됩니다.**
 
@@ -503,6 +531,7 @@ React가 다른 점은 **무엇이 바뀌었는지 알아내서 바뀐 부분만
 | 메시지 최소 길이 | **10자** | `js/form.js` `MIN_MESSAGE_LENGTH` | 의미 있는 문의가 되기 위한 최소한 |
 | 타이핑 속도 | 입력 90ms / 삭제 40ms / 대기 1600ms | `js/hero.js` | 읽을 수 있으면서 지루하지 않은 속도 |
 | GitHub 조회 계정 | `chabeegees`, `junhyeok-cha` | `js/projects.js` `GITHUB_USERNAMES` | 본인이 사용하는 두 계정 |
+| Featured 저장소 | 조직 저장소 3개 | `js/projects.js` `FEATURED_REPOS` | 조직 소속이라 계정 조회에 잡히지 않지만 먼저 보여주고 싶은 프로젝트 |
 
 ---
 
@@ -530,11 +559,15 @@ python3 -m http.server 8000
 ## 알려진 제약
 
 - **GitHub API 요청 한도** — 인증 없이 호출하면 시간당 60회입니다.
-  이 사이트는 페이지를 한 번 열 때 계정 2개를 조회하므로 **시간당 약 30회** 새로고침할 수 있습니다.
+  이 사이트는 페이지를 한 번 열 때 계정 2회 + Featured 저장소 3회 = **총 5회**를 호출하므로
+  **시간당 약 12회** 새로고침할 수 있습니다.
   한도를 넘기면 403이 오고, 그때는 에러 상태 UI와 함께
   "요청 한도(시간당 60회)를 초과했습니다"라는 안내가 표시됩니다.
   토큰을 넣으면 한도가 늘어나지만, 정적 사이트의 소스에 토큰을 넣으면
   누구나 볼 수 있으므로 **일부러 넣지 않았습니다.**
+- **비공개 저장소는 표시할 수 없습니다.** 인증 없는 GitHub API는 공개 저장소만 응답합니다.
+  비공개 저장소를 Projects에 넣으려면 해당 저장소를 공개로 전환해야 합니다.
+  (`2026-Anyang-city-AI-competition/anyang-parking`이 현재 이 경우에 해당합니다.)
 - **문의 폼에 백엔드가 없습니다.** GitHub Pages는 정적 파일만 제공하므로
   서버로 전송할 수 없습니다. 검증을 통과하면 `mailto:` 링크를 여는 방식으로 대신했습니다.
   실제 전송이 필요하면 Formspree/EmailJS를 붙일 수 있습니다.
@@ -548,8 +581,9 @@ python3 -m http.server 8000
 최신 Chrome(headless, DevTools Protocol)으로 자동 점검한 결과입니다.
 
 - [x] 콘솔 에러 **0건**
-- [x] GitHub API 성공 — 저장소 16개, 카드 16장 렌더
-- [x] 언어 필터 9종 생성 (All 포함)
+- [x] GitHub API 성공 — 저장소 19개(Featured 3 + 개인 16), 카드 19장 렌더
+- [x] Featured 저장소 3개가 목록 맨 앞에 배지와 함께 표시
+- [x] 언어 필터 10종 생성 (All 포함), Python 필터 선택 시 5장으로 축소 → All 복귀 시 19장
 - [x] 에러 상태 — 네트워크 차단 시 에러 UI + 재시도 버튼 표시
 - [x] 다크 모드 토글 → `localStorage` 저장 → 새로고침 후 유지
 - [x] 스크롤 0px / 100px / 500px에서 헤더·스크롤탑 버튼 상태 전환

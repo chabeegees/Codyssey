@@ -13,6 +13,15 @@
   const GITHUB_USERNAMES = ['chabeegees', 'junhyeok-cha'];
   const REPOS_PER_USER = 100;
 
+  /* 개인 계정이 아닌 조직(Organization) 소속이라 위 목록에는 잡히지 않는,
+     그러나 먼저 보여주고 싶은 저장소들입니다. 'owner/repo' 형식으로 적습니다.
+     여기 있는 저장소는 카드에 'Featured' 배지가 붙고 목록 맨 앞에 나옵니다. */
+  const FEATURED_REPOS = [
+    '2026-Unithon/AskBuddy',
+    'soongsil-database-bouget/soongsil-database-bouget',
+    'Blueocean-union/Union-Project',
+  ];
+
   const viewElement = document.querySelector('#projects-view');
   const filtersElement = document.querySelector('#project-filters');
 
@@ -50,6 +59,22 @@
   };
 
   /**
+   * 저장소 하나를 'owner/repo' 이름으로 직접 가져옵니다.
+   * 조직 저장소는 /users/{id}/repos 응답에 포함되지 않기 때문에 따로 요청합니다.
+   */
+  const fetchRepo = async (fullName) => {
+    const response = await fetch(`https://api.github.com/repos/${fullName}`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`'${fullName}' 저장소를 가져오지 못했습니다 (HTTP ${response.status})`);
+    }
+
+    return response.json();
+  };
+
+  /**
    * 카드에 필요한 값만 남깁니다. (구조분해 할당으로 필요한 키만 꺼냅니다)
    */
   const toProject = ({
@@ -74,20 +99,41 @@
     topics: topics.slice(0, 4),
     updatedAt,
     owner,
+    featured: false,
   });
+
+  /** 최근 업데이트가 앞에 오도록 정렬합니다. */
+  const byRecentlyUpdated = (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt);
 
   /** 모든 계정의 저장소를 가져와 정리합니다. */
   const loadProjects = async () => {
     App.setState({ projectsStatus: 'loading', projectsError: '' });
 
     try {
-      const responses = await Promise.all(GITHUB_USERNAMES.map(fetchReposOf));
+      /* 개인 계정 저장소와 조직 저장소를 동시에 요청합니다.
+         allSettled는 실패한 것이 있어도 나머지 결과를 그대로 돌려줍니다.
+         조직 저장소 하나가 비공개로 바뀌어도 전체 목록이 날아가지 않게 하려는 의도입니다. */
+      const [userResults, featuredResults] = await Promise.all([
+        Promise.all(GITHUB_USERNAMES.map(fetchReposOf)),
+        Promise.allSettled(FEATURED_REPOS.map(fetchRepo)),
+      ]);
 
-      const projects = responses
+      const featured = featuredResults
+        .filter(({ status }) => status === 'fulfilled')
+        .map(({ value }) => ({ ...toProject(value), featured: true }))
+        .sort(byRecentlyUpdated);
+
+      /* 개인 저장소 중 이미 Featured에 들어간 것은 중복이므로 걸러냅니다. */
+      const featuredIds = new Set(featured.map(({ id }) => id));
+
+      const personal = userResults
         .flat()
         .filter(({ fork }) => !fork)                       // 포크한 저장소는 제외
         .map(toProject)
-        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        .filter(({ id }) => !featuredIds.has(id))
+        .sort(byRecentlyUpdated);
+
+      const projects = [...featured, ...personal];
 
       if (projects.length === 0) {
         App.setState({ projectsStatus: 'empty', projects: [] });
@@ -145,9 +191,13 @@
     topics,
     updatedAt,
     owner,
+    featured,
   }) => `
-    <article class="card">
-      <p class="card__owner">${escapeHtml(owner)}</p>
+    <article class="card${featured ? ' card--featured' : ''}">
+      <p class="card__owner">
+        ${escapeHtml(owner)}
+        ${featured ? '<span class="card__badge">Featured</span>' : ''}
+      </p>
       <h3 class="card__title">
         <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
           ${escapeHtml(name)}
