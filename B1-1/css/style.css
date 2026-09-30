@@ -744,6 +744,16 @@ button {
 }
 
 /* 카드 그리드 — auto-fit + minmax로 별도 미디어 쿼리 없이 반응합니다. */
+.projects-warning {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
 .project-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

@@ -29,6 +29,55 @@
      1. 데이터 가져오기
      --------------------------------------------------------------- */
 
+  const fetchGitHubJson = async (url, notFoundMessage) => {
+    let response;
+
+    //응답을 아예 받지 못한 경우
+    // fetch 자체가 실패하면 TypeError가 발생 (네트워크 문제, CORS 문제 등)
+    try {
+      response = await fetch(url, {
+        headers: { Accept: 'application/vnd.github+json' },
+      });
+    } catch (error) {
+      if (error instanceof TypeError) {
+        throw new Error('GitHub에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      const { status, headers } = response;
+      // 404 : 저장소 못찾음 or 비공개 저장소
+      if (status === 404) throw new Error(notFoundMessage);
+      // 401 : 인증 실패 (토큰이 없거나 잘못됨)
+      if (status === 401) throw new Error('GitHub API 인증에 실패했습니다.');
+      // 403 : 요청 제한 (rate limit) 초과
+      if (status === 429 || (status === 403 && headers.get('x-ratelimit-remaining') === '0')) {
+        throw new Error('GitHub API 요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+      // 403 : 일시적 요청 제한 
+      if (status === 403 && headers.has('retry-after')) {
+        throw new Error('GitHub에서 요청을 일시적으로 제한했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+      if (status === 403) {
+        throw new Error('GitHub API 요청이 거부되었거나 일시적으로 제한되었습니다 (HTTP 403).');
+      }
+      // 500 이상 : 깃허브 서버 문제
+      if (status >= 500) throw new Error('GitHub 서버에 문제가 있습니다. 잠시 후 다시 시도해 주세요.');
+      throw new Error(`GitHub API 요청에 실패했습니다 (HTTP ${status}).`);
+    }
+
+    //JSON 형식이 잘못됐거나 응답을 읽을 수 없는 경우
+    try {
+      return await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError || error instanceof TypeError) {
+        throw new Error('GitHub API 응답을 읽을 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      }
+      throw error;
+    }
+  };
+
   /**
    * 한 계정의 저장소 목록을 가져옵니다.
    * 실패하면 호출한 쪽에서 잡을 수 있도록 에러를 던집니다.
@@ -38,24 +87,9 @@
       `https://api.github.com/users/${username}/repos` +
       `?per_page=${REPOS_PER_USER}&sort=updated`;
 
-    const response = await fetch(endpoint, {
-      headers: { Accept: 'application/vnd.github+json' },
-    });
-
-    if (!response.ok) {
-      /* 인증 없이 호출하면 시간당 60회 제한이 있습니다. 초과 시 403이 옵니다. */
-      if (response.status === 403) {
-        throw new Error(
-          'GitHub API 요청 한도(시간당 60회)를 초과했습니다. 잠시 후 다시 시도해 주세요.'
-        );
-      }
-      if (response.status === 404) {
-        throw new Error(`'${username}' 계정을 찾을 수 없습니다.`);
-      }
-      throw new Error(`GitHub API 응답 오류 (HTTP ${response.status})`);
-    }
-
-    return response.json();
+    const repos = await fetchGitHubJson(endpoint, `'${username}' 계정을 찾을 수 없습니다.`);
+    if (!Array.isArray(repos)) throw new Error('GitHub 저장소 목록의 형식이 올바르지 않습니다.');
+    return repos;
   };
 
   /**
@@ -63,15 +97,14 @@
    * 조직 저장소는 /users/{id}/repos 응답에 포함되지 않기 때문에 따로 요청합니다.
    */
   const fetchRepo = async (fullName) => {
-    const response = await fetch(`https://api.github.com/repos/${fullName}`, {
-      headers: { Accept: 'application/vnd.github+json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`'${fullName}' 저장소를 가져오지 못했습니다 (HTTP ${response.status})`);
+    const repo = await fetchGitHubJson(
+      `https://api.github.com/repos/${fullName}`,
+      `'${fullName}' 저장소를 찾을 수 없습니다.`
+    );
+    if (!repo || Array.isArray(repo) || typeof repo !== 'object') {
+      throw new Error(`'${fullName}' 저장소 응답의 형식이 올바르지 않습니다.`);
     }
-
-    return response.json();
+    return repo;
   };
 
   /**
@@ -107,7 +140,7 @@
 
   /** 모든 계정의 저장소를 가져와 정리합니다. */
   const loadProjects = async () => {
-    App.setState({ projectsStatus: 'loading', projectsError: '' });
+    App.setState({ projectsStatus: 'loading', projectsError: '', projectsWarning: '' });
 
     try {
       /* 개인 계정 저장소와 조직 저장소를 동시에 요청합니다.
@@ -123,6 +156,15 @@
         .map(({ value }) => ({ ...toProject(value), featured: true }))
         .sort(byRecentlyUpdated);
 
+      const failedFeatured = featuredResults
+        .map((result, index) => result.status === 'rejected'
+          ? `${FEATURED_REPOS[index]} (${result.reason?.message || '알 수 없는 오류'})`
+          : null)
+        .filter(Boolean);
+      const projectsWarning = failedFeatured.length
+        ? `일부 추천 저장소를 가져오지 못했습니다: ${failedFeatured.join('; ')}`
+        : '';
+
       /* 개인 저장소 중 이미 Featured에 들어간 것은 중복이므로 걸러냅니다. */
       const featuredIds = new Set(featured.map(({ id }) => id));
 
@@ -136,7 +178,7 @@
       const projects = [...featured, ...personal];
 
       if (projects.length === 0) {
-        App.setState({ projectsStatus: 'empty', projects: [] });
+        App.setState({ projectsStatus: 'empty', projects: [], projectsWarning });
         return;
       }
 
@@ -144,19 +186,14 @@
         projectsStatus: 'success',
         projects,
         activeLanguage: 'All',
+        projectsWarning,
       });
     } catch (error) {
-      /* fetch는 네트워크 자체가 끊기면 TypeError를 던집니다.
-         이때의 기본 메시지('Failed to fetch')는 사용자에게 의미가 없으므로 바꿔줍니다. */
-      const detail =
-        error instanceof TypeError
-          ? '네트워크에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.'
-          : error.message;
-
       App.setState({
         projectsStatus: 'error',
         projects: [],
-        projectsError: detail,
+        projectsError: error.message || '프로젝트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        projectsWarning: '',
       });
     }
   };
@@ -259,6 +296,9 @@
     </div>
   `;
 
+  const warningTemplate = (message) =>
+    message ? `<p class="projects-warning" role="status">${escapeHtml(message)}</p>` : '';
+
   /* ---------------------------------------------------------------
      3. 렌더 — 상태 하나만 보고 화면 전체를 결정합니다
      --------------------------------------------------------------- */
@@ -283,7 +323,7 @@
     filtersElement.hidden = languages.length <= 2;
   };
 
-  const renderProjects = ({ projectsStatus, projects, projectsError, activeLanguage }) => {
+  const renderProjects = ({ projectsStatus, projects, projectsError, projectsWarning, activeLanguage }) => {
     viewElement.setAttribute('aria-busy', String(projectsStatus === 'loading'));
 
     if (projectsStatus === 'idle' || projectsStatus === 'loading') {
@@ -300,7 +340,7 @@
 
     if (projectsStatus === 'empty') {
       filtersElement.hidden = true;
-      viewElement.innerHTML = emptyTemplate();
+      viewElement.innerHTML = warningTemplate(projectsWarning) + emptyTemplate();
       return;
     }
 
@@ -312,10 +352,11 @@
         ? projects
         : projects.filter(({ language }) => language === activeLanguage);
 
-    viewElement.innerHTML =
+    viewElement.innerHTML = warningTemplate(projectsWarning) + (
       visibleProjects.length > 0
         ? `<div class="project-grid">${visibleProjects.map(cardTemplate).join('')}</div>`
-        : noMatchTemplate(activeLanguage);
+        : noMatchTemplate(activeLanguage)
+    );
   };
 
   App.subscribe(renderProjects);

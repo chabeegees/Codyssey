@@ -24,6 +24,7 @@ const App = (() => {
     projectsStatus: 'idle',      // 'idle' | 'loading' | 'success' | 'error' | 'empty'
     projects: [],                // 성공 시 저장소 배열
     projectsError: '',           // 에러 상태에서 보여줄 메시지
+    projectsWarning: '',         // 일부 추천 저장소 요청이 실패한 경우
     activeLanguage: 'All',       // 흐름 ④ 언어 필터
 
     /* 흐름 ③ 문의 폼 */
